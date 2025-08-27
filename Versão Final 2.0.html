@@ -1,0 +1,1538 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Projeto Zoe - Horta na Escola</title>
+    <!-- Inclui o Tailwind CSS para estilização -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Inclui o Chart.js para gráficos -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Fonte Poppins -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome para ícones -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #e2f0d9;
+            color: #1a4d2e;
+        }
+        /* Estilos do Menu Principal */
+        #menu-principal {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+        .menu-card {
+            background-color: white;
+            border-radius: 1rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            text-decoration: none;
+            color: inherit;
+            cursor: pointer;
+        }
+        .menu-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 35px rgba(0, 0, 0, 0.15);
+        }
+        .menu-card .icon {
+            background-color: #57996c;
+            color: white;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            margin: -40px auto 1rem;
+            border: 4px solid white;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Estilos do Plano de Ação */
+        .section-title {
+            color: #1a4d2e;
+            border-bottom: 2px solid #57996c;
+            padding-bottom: 0.5rem;
+        }
+        .input-range { -webkit-appearance: none; width: 100%; height: 8px; background: #d4e7d4; outline: none; opacity: 0.7; transition: opacity .2s; border-radius: 4px; }
+        .input-range:hover { opacity: 1; }
+        .input-range::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 20px; height: 20px; background: #57996c; cursor: pointer; border-radius: 50%; }
+        .input-range::-moz-range-thumb { width: 20px; height: 20px; background: #57996c; cursor: pointer; border-radius: 50%; }
+        .sub-task-list { list-style: none; padding-left: 0; margin-top: 1rem; }
+        .sub-task-item { display: flex; flex-direction: column; align-items: flex-start; margin-bottom: 0.5rem; padding: 0.75rem; border-radius: 0.5rem; background-color: #f0f4f8; box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05); position: relative; }
+        @media (min-width: 640px) { .sub-task-item { flex-direction: row; align-items: center; justify-content: space-between; } }
+        .sub-task-item input[type="checkbox"] { margin-right: 1rem; }
+        .sub-task-item.completed label { text-decoration: line-through; color: #9ca3af; }
+        .leiras-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(40px, 1fr)); gap: 0.5rem; max-height: 200px; overflow-y: auto; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.5rem; background-color: white; }
+        .leiras-grid label { display: block; text-align: center; padding: 0.25rem; border: 1px solid transparent; border-radius: 0.25rem; cursor: pointer; transition: all 0.2s; }
+        .leiras-grid input[type="checkbox"] { display: none; }
+        .leiras-grid input[type="checkbox"]:checked + label { background-color: #d4e7d4; border-color: #57996c; color: #1a4d2e; font-weight: bold; }
+        
+        /* Estilos da Visão de Leiras */
+        #visao-leiras { background-color: #f0f9eb; }
+        .leira-card { transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out; border-left-width: 4px; }
+        .leira-card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
+        
+        /* Estilos dos Modais */
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.6); display: none; align-items: center; justify-content: center; z-index: 100; backdrop-filter: blur(4px); }
+        .modal.open { display: flex; }
+        .modal-content { background-color: white; padding: 2rem; border-radius: 1rem; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); max-width: 95%; width: 600px; max-height: 90vh; overflow-y: auto; }
+        .history-item:not(:last-child) { border-bottom: 1px solid #e5e7eb; }
+        .delete-history-btn { background: none; border: none; cursor: pointer; padding: 0.5rem; border-radius: 50%; line-height: 1; }
+        .delete-history-btn:hover { background-color: #fee2e2; }
+
+        /* Estilos do Mapa da Horta */
+        #mapa-horta {
+            background-color: #f0f9eb;
+        }
+        .mapa-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 1rem;
+            padding: 1rem;
+        }
+        .leira-map-card {
+            background-color: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            padding: 1rem;
+            text-align: center;
+            border: 2px solid transparent;
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+        }
+        .leira-map-card:hover {
+            transform: scale(1.03);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .leira-map-card.vazia {
+            background-color: #f7fee7;
+            border-color: #a3e635;
+        }
+        .leira-map-card.plantada {
+            background-color: #d4e7d4;
+            border-color: #57996c;
+        }
+        .leira-map-card.pronta {
+            animation: pulse-green 1.5s infinite;
+            border-color: #16a34a;
+        }
+        @keyframes pulse-green {
+            0%, 100% {
+                box-shadow: 0 0 0 0 #34d399;
+            }
+            50% {
+                box-shadow: 0 0 0 10px rgba(52, 211, 153, 0);
+            }
+        }
+    </style>
+</head>
+<body class="p-4">
+
+    <!-- SEÇÃO: MENU PRINCIPAL -->
+    <div id="menu-principal">
+        <div class="container mx-auto max-w-4xl text-center">
+            <header class="mb-12">
+                <h1 class="text-4xl sm:text-5xl font-extrabold text-[#1a4d2e] mb-2">Projeto Zoe - Horta na Escola</h1>
+                <p class="text-lg text-gray-600">Centro de Excelência Professora Maria Conceição de Santana</p>
+                <p class="text-xl text-gray-600 mt-4">Selecione uma ferramenta para começar</p>
+            </header>
+            <main class="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
+                <div id="btn-plano-acao" class="menu-card p-8 pt-12 block">
+                    <div class="icon"><i class="fas fa-tasks"></i></div>
+                    <h2 class="text-2xl font-bold text-[#1a4d2e] mb-2">Plano de Ação</h2>
+                    <p class="text-gray-600">Organize as tarefas, distribua as responsabilidades e acompanhe o progresso semanal.</p>
+                </div>
+                <div id="btn-visao-leiras" class="menu-card p-8 pt-12 block">
+                    <div class="icon"><i class="fas fa-seedling"></i></div>
+                    <h2 class="text-2xl font-bold text-[#1a4d2e] mb-2">Visão Geral das Leiras</h2>
+                    <p class="text-gray-600">Visualize o status de cada leira, veja a última tarefa realizada e consulte o histórico.</p>
+                </div>
+                <div id="btn-mapa-horta" class="menu-card p-8 pt-12 block">
+                    <div class="icon"><i class="fas fa-map-marked-alt"></i></div>
+                    <h2 class="text-2xl font-bold text-[#1a4d2e] mb-2">Mapa da Horta</h2>
+                    <p class="text-gray-600">Acompanhe as hortaliças plantadas, a data de plantio e a previsão de colheita.</p>
+                </div>
+                 <div id="btn-gerenciamento" class="menu-card p-8 pt-12 block md:col-span-3 lg:col-span-1 md:col-start-2 lg:col-start-auto">
+                    <div class="icon"><i class="fas fa-chart-line"></i></div>
+                    <h2 class="text-2xl font-bold text-[#1a4d2e] mb-2">Gerenciamento da Horta</h2>
+                    <p class="text-gray-600">Gerencie a produção, finanças e visualize o desempenho da horta.</p>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- SEÇÃO: PLANO DE AÇÃO -->
+    <div id="plano-acao" class="hidden">
+        <div class="container mx-auto bg-white p-8 rounded-xl shadow-2xl">
+            <button class="btn-voltar-menu inline-block mb-6 text-gray-600 hover:text-[#57996c] transition-colors duration-300">
+                <i class="fas fa-arrow-left mr-2"></i>Voltar ao Menu Principal
+            </button>
+            <header class="text-center mb-8">
+                <h1 class="text-4xl sm:text-5xl font-extrabold text-[#1a4d2e] mb-2">Plano de Ação</h1>
+                <p class="text-xl text-gray-500">Cultivando conhecimento, colhendo o futuro.</p>
+            </header>
+            
+            <section class="mb-12">
+                <h2 class="text-3xl font-bold section-title mb-4">Seleção de Grupo, Turma e Semana</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
+                    <div class="p-4 bg-gray-50 rounded-lg shadow-inner">
+                        <label for="turma-select" class="block text-gray-700 font-semibold mb-2">Turma:</label>
+                        <select id="turma-select" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#57996c]">
+                            <option value="">-- Selecione a Turma --</option>
+                            <option value="2ª A">2ª A</option>
+                            <option value="2ª B">2ª B</option>
+                        </select>
+                    </div>
+                    <div class="p-4 bg-gray-50 rounded-lg shadow-inner">
+                        <label for="group-select" class="block text-gray-700 font-semibold mb-2">Grupo:</label>
+                        <select id="group-select" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#57996c]">
+                            <option value="">-- Selecione o Grupo --</option>
+                            <option value="01">01</option><option value="02">02</option><option value="03">03</option><option value="04">04</option><option value="05">05</option><option value="06">06</option>
+                        </select>
+                    </div>
+                    <div class="p-4 bg-gray-50 rounded-lg shadow-inner">
+                        <label class="block text-gray-700 font-semibold mb-2">Semana do Ano:</label>
+                        <span id="week-display" class="block text-2xl font-bold text-[#57996c]">--</span>
+                        <p class="text-sm text-gray-500 mt-1">Calculada automaticamente</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="mb-12">
+                <h2 class="text-3xl font-bold section-title mb-6">Minhas Tarefas do Grupo</h2>
+                <div class="bg-gray-50 p-6 rounded-lg shadow-inner">
+                    <div class="mb-4">
+                        <label for="task-group-select" class="block text-gray-700 font-semibold mb-2">Selecione seu Grupo de Tarefas:</label>
+                        <select id="task-group-select" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#57996c]">
+                            <option value="">-- Selecione um grupo --</option>
+                            <option value="Controle e Plantio de Sementes">Controle e Plantio de Sementes</option>
+                            <option value="Controle de Plantio e Colheita">Controle de Plantio e Colheita</option>
+                            <option value="Limpeza e Manutenção das Leiras">Limpeza e Manutenção das Leiras</option>
+                            <option value="Prevenção de Pragas">Prevenção de Pragas</option>
+                            <option value="Irrigação e Manutenção da Hidroponia">Irrigação e Manutenção da Hidroponia</option>
+                            <option value="Gerenciamento da Horta">Gerenciamento da Horta</option>
+                        </select>
+                    </div>
+                    <div id="sub-tasks-checklist" class="mt-6"><p class="text-center text-gray-500 italic">Selecione um grupo acima para ver as tarefas.</p></div>
+                </div>
+            </section>
+            
+            <!-- Botão Salvar e Enviar -->
+            <section class="my-8 text-center">
+                 <button id="save-tasks-btn" class="bg-green-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-green-700 transition duration-300 transform hover:scale-105 shadow-lg">
+                    <i class="fas fa-save mr-2"></i> Salvar e Enviar Tarefas
+                </button>
+                <p id="save-feedback" class="text-green-700 mt-2 h-4"></p>
+            </section>
+
+            <section class="mb-12">
+                <h2 class="text-3xl font-bold section-title mb-6">Ciclo de Rodízio de Tarefas</h2>
+                <div class="bg-gray-50 p-6 rounded-lg shadow-inner overflow-x-auto">
+                    <table class="w-full text-left border-collapse rounded-lg">
+                        <thead><tr class="bg-[#57996c] text-white"><th class="p-4 font-semibold rounded-tl-lg">Semana</th><th class="p-4 font-semibold">Grupo 1</th><th class="p-4 font-semibold">Grupo 2</th><th class="p-4 font-semibold">Grupo 3</th><th class="p-4 font-semibold">Grupo 4</th><th class="p-4 font-semibold">Grupo 5</th><th class="p-4 font-semibold rounded-tr-lg">Grupo 6</th></tr></thead>
+                        <tbody id="rotation-table-body"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="mb-12">
+                <h2 class="text-3xl font-bold section-title mb-6">Adicionar uma Sub-Tarefa (Opcional)</h2>
+                <div class="bg-gray-50 p-6 rounded-lg shadow-inner">
+                    <form id="sub-task-form">
+                        <div class="mb-4"><label for="sub-task-group-name" class="block text-gray-700 font-semibold mb-2">Grupo de Tarefas:</label><input type="text" id="sub-task-group-name" class="w-full p-3 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed" readonly placeholder="Selecione um grupo..."></div>
+                        <div class="mb-4"><label for="sub-task-name" class="block text-gray-700 font-semibold mb-2">Nome da Sub-Tarefa:</label><input type="text" id="sub-task-name" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#57996c]" placeholder="Ex: Revisar as Plantas" required></div>
+                        <div class="mb-4"><label for="sub-task-effort" class="block text-gray-700 font-semibold mb-2">Esforço Necessário:</label><div class="flex items-center"><span id="sub-effort-value" class="w-12 text-right mr-3 text-gray-600">50%</span><input type="range" id="sub-task-effort" min="0" max="100" value="50" class="input-range flex-1"></div></div>
+                        <div class="mb-6"><label for="sub-task-time" class="block text-gray-700 font-semibold mb-2">Tempo Estimado (minutos):</label><div class="flex items-center"><span id="sub-time-value" class="w-12 text-right mr-3 text-gray-600">25</span><input type="range" id="sub-task-time" min="0" max="50" value="25" class="input-range flex-1"></div></div>
+                        <div class="mb-6"><label class="block text-gray-700 font-semibold mb-2">Leiras Realizadas: <span id="selected-leiras-count" class="font-normal italic text-gray-500">(0 selecionadas)</span></label><div id="leiras-checkbox-container-form" class="leiras-grid"></div></div>
+                        <button type="submit" class="w-full bg-[#57996c] text-white font-bold py-3 rounded-lg hover:bg-[#4a855c] transition duration-300 transform hover:scale-105">Adicionar Sub-Tarefa <i class="fas fa-plus ml-2"></i></button>
+                    </form>
+                </div>
+            </section>
+            
+            <footer class="text-center text-gray-400 text-sm mt-8">
+                <p>Status: <span id="status-message-plano">Conectando...</span></p>
+                <p>ID do Usuário: <span id="user-id-display">N/A</span></p>
+            </footer>
+        </div>
+    </div>
+
+    <!-- SEÇÃO: VISÃO GERAL DAS LEIRAS -->
+    <div id="visao-leiras" class="hidden">
+        <div class="container mx-auto">
+            <button class="btn-voltar-menu inline-block mb-6 text-gray-600 hover:text-[#1a4d2e] transition-colors duration-300">
+                <i class="fas fa-arrow-left mr-2"></i>Voltar ao Menu Principal
+            </button>
+            <header class="text-center mb-10">
+                <h1 class="text-4xl sm:text-5xl font-extrabold text-[#1a4d2e] mb-2">Visão Geral das Leiras</h1>
+                <p class="text-lg text-gray-600">Acompanhe o progresso de cada canteiro em tempo real (tarefas de todos).</p>
+            </header>
+            <main id="leiras-grid-container" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                <p id="loading-message" class="col-span-full text-center text-gray-500 text-xl py-10"><i class="fas fa-spinner fa-spin mr-2"></i> Carregando dados das leiras...</p>
+            </main>
+            <footer class="text-center text-gray-400 text-sm mt-8">
+                <p>Status: <span id="status-message-leiras">Conectando...</span></p>
+            </footer>
+        </div>
+    </div>
+
+    <!-- SEÇÃO: MAPA DA HORTA -->
+    <div id="mapa-horta" class="hidden min-h-screen pt-12">
+        <div class="container mx-auto bg-white p-8 rounded-xl shadow-2xl">
+            <button class="btn-voltar-menu inline-block mb-6 text-gray-600 hover:text-[#57996c] transition-colors duration-300">
+                <i class="fas fa-arrow-left mr-2"></i>Voltar ao Menu Principal
+            </button>
+            <header class="text-center mb-8">
+                <h1 class="text-4xl sm:text-5xl font-extrabold text-[#1a4d2e] mb-2">Mapa da Horta</h1>
+                <p class="text-xl text-gray-500">Clique em uma leira para atualizar o que foi plantado.</p>
+            </header>
+            <main id="mapa-leiras-container" class="mapa-grid">
+                <p class="col-span-full text-center text-gray-500 text-xl py-10"><i class="fas fa-spinner fa-spin mr-2"></i> Carregando mapa...</p>
+            </main>
+        </div>
+    </div>
+
+    <!-- SEÇÃO: GERENCIAMENTO DA HORTA -->
+    <div id="gerenciamento-painel" class="hidden min-h-screen pt-12">
+        <div class="container mx-auto bg-white p-8 rounded-xl shadow-2xl">
+            <button class="btn-voltar-menu inline-block mb-6 text-gray-600 hover:text-[#57996c] transition-colors duration-300">
+                <i class="fas fa-arrow-left mr-2"></i>Voltar ao Menu Principal
+            </button>
+            <header class="text-center mb-8">
+                <h1 class="text-4xl sm:text-5xl font-extrabold text-[#1a4d2e] mb-2">Gerenciamento da Horta</h1>
+                <p class="text-xl text-gray-500">Registre colheitas e acompanhe o desempenho financeiro.</p>
+            </header>
+
+            <section class="mb-8">
+                <h2 class="text-2xl font-bold section-title mb-4">Registrar Nova Colheita</h2>
+                <form id="producao-form" class="space-y-4">
+                    <div class="flex flex-col">
+                        <label for="producao-hortalica" class="font-semibold text-gray-700 mb-1">Hortaliça/Verdura:</label>
+                        <select id="producao-hortalica" class="p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#57996c]" required>
+                            <option value="">-- Selecione uma opção --</option>
+                            <option value="Abobrinha">Abobrinha</option>
+                            <option value="Alface">Alface</option>
+                            <option value="Alho">Alho</option>
+                            <option value="Alho-poró">Alho-poró</option>
+                            <option value="Beterraba">Beterraba</option>
+                            <option value="Brócolis">Brócolis</option>
+                            <option value="Cebolinha">Cebolinha</option>
+                            <option value="Cenoura">Cenoura</option>
+                            <option value="Coentro">Coentro</option>
+                            <option value="Couve">Couve</option>
+                            <option value="Couve-flor">Couve-flor</option>
+                            <option value="Manjericão">Manjericão</option>
+                            <option value="Milho">Milho</option>
+                            <option value="Morango">Morango</option>
+                            <option value="Pepino">Pepino</option>
+                            <option value="Pimenta de cheiro">Pimenta de cheiro</option>
+                            <option value="Pimentão">Pimentão</option>
+                            <option value="Rabanete">Rabanete</option>
+                            <option value="Rúcula">Rúcula</option>
+                            <option value="Tomate">Tomate</option>
+                        </select>
+                    </div>
+                    <div class="flex flex-col">
+                        <label for="producao-peso" class="font-semibold text-gray-700 mb-1">Peso (kg):</label>
+                        <input type="number" id="producao-peso" class="p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#57996c]" step="0.1" min="0.1" required>
+                    </div>
+                    <div class="flex flex-col">
+                        <label for="producao-custo" class="font-semibold text-gray-700 mb-1">Custo de Investimento (R$):</label>
+                        <input type="number" id="producao-custo" class="p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#57996c]" step="0.01" min="0" required>
+                    </div>
+                    <div class="text-center">
+                        <button type="submit" class="bg-[#57996c] text-white font-bold py-3 px-8 rounded-lg hover:bg-[#4a855c] transition duration-300 transform hover:scale-105 shadow-lg">
+                            <i class="fas fa-plus mr-2"></i> Registrar Produção
+                        </button>
+                    </div>
+                </form>
+            </section>
+
+            <section class="mb-8">
+                <h2 class="text-2xl font-bold section-title mb-4">Resumo Financeiro</h2>
+                <div class="bg-gray-50 p-6 rounded-lg shadow-inner grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                    <div>
+                        <p class="text-gray-600 text-sm">Receita Total</p>
+                        <p id="total-receita" class="text-2xl font-bold text-[#1a4d2e]">R$ 0,00</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-600 text-sm">Custo Total</p>
+                        <p id="total-custo" class="text-2xl font-bold text-[#1a4d2e]">R$ 0,00</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-600 text-sm">Lucro Total</p>
+                        <p id="total-lucro" class="text-2xl font-bold text-green-600">R$ 0,00</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="mb-8">
+                <h2 class="text-2xl font-bold section-title mb-4">Desempenho por Hortaliça</h2>
+                <div class="bg-gray-50 p-6 rounded-lg shadow-inner">
+                    <canvas id="profit-chart"></canvas>
+                </div>
+            </section>
+
+            <section class="mb-8">
+                <h2 class="text-2xl font-bold section-title mb-4">Histórico de Produção</h2>
+                <div class="bg-gray-50 p-6 rounded-lg shadow-inner overflow-x-auto">
+                    <table class="w-full text-left border-collapse rounded-lg">
+                        <thead>
+                            <tr class="bg-[#57996c] text-white">
+                                <th class="p-4 font-semibold">Data</th>
+                                <th class="p-4 font-semibold">Hortaliça</th>
+                                <th class="p-4 font-semibold">Peso (kg)</th>
+                                <th class="p-4 font-semibold">Custo (R$)</th>
+                                <th class="p-4 font-semibold">Receita (R$)</th>
+                                <th class="p-4 font-semibold">Lucro (R$)</th>
+                                <th class="p-4 font-semibold">Ação</th>
+                            </tr>
+                        </thead>
+                        <tbody id="producao-historico-table-body">
+                            <tr><td colspan="7" class="text-center text-gray-500 py-4">Nenhum dado de produção registrado.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <footer class="text-center text-gray-400 text-sm mt-8">
+                <p>Status: <span id="status-message-gerenciamento">Conectando...</span></p>
+            </footer>
+        </div>
+    </div>
+
+    <!-- MODAIS -->
+    <div id="leiras-modal" class="modal"><div class="modal-content" style="width: 500px;"><h3 class="text-2xl font-bold text-gray-800 mb-4">Selecione as Leiras</h3><p class="text-gray-600 mb-4">Marque as leiras onde você realizou a tarefa: <span id="modal-task-name" class="font-semibold italic"></span></p><div id="leiras-checkbox-container-modal" class="leiras-grid"></div><div class="flex justify-end space-x-4 mt-4"><button id="cancel-leiras-modal" class="bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg hover:bg-gray-400 transition duration-300">Cancelar</button><button id="save-leiras-modal" class="bg-[#57996c] text-white font-bold py-2 px-4 rounded-lg hover:bg-[#4a855c] transition duration-300">Salvar</button></div></div></div>
+    <div id="history-modal" class="modal"><div class="modal-content"><div class="flex justify-between items-center mb-4"><h3 class="text-2xl font-bold text-gray-800">Histórico da Leira <span id="modal-leira-id" class="text-[#57996c]"></span></h3><button id="close-modal-btn" class="text-gray-500 hover:text-gray-800 text-2xl">&times;</button></div><div id="modal-body" class="space-y-4"></div></div></div>
+    
+    <!-- Novo Modal para o Mapa da Horta -->
+    <div id="mapa-leira-modal" class="modal">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-2xl font-bold text-gray-800">Leira <span id="mapa-modal-leira-id" class="text-[#57996c]"></span></h3>
+                <button id="close-mapa-modal-btn" class="text-gray-500 hover:text-gray-800 text-2xl">&times;</button>
+            </div>
+            <div class="space-y-4">
+                <div class="flex flex-col">
+                    <label for="hortalica-select" class="font-semibold text-gray-700 mb-1">Hortaliça/Verdura:</label>
+                    <select id="hortalica-select" class="p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#57996c]">
+                        <option value="">-- Selecione uma opção --</option>
+                        <option value="Abobrinha">Abobrinha</option>
+                        <option value="Alface">Alface</option>
+                        <option value="Alho">Alho</option>
+                        <option value="Alho-poró">Alho-poró</option>
+                        <option value="Beterraba">Beterraba</option>
+                        <option value="Brócolis">Brócolis</option>
+                        <option value="Cebolinha">Cebolinha</option>
+                        <option value="Cenoura">Cenoura</option>
+                        <option value="Coentro">Coentro</option>
+                        <option value="Couve">Couve</option>
+                        <option value="Couve-flor">Couve-flor</option>
+                        <option value="Manjericão">Manjericão</option>
+                        <option value="Milho">Milho</option>
+                        <option value="Morango">Morango</option>
+                        <option value="Pepino">Pepino</option>
+                        <option value="Pimenta de cheiro">Pimenta de cheiro</option>
+                        <option value="Pimentão">Pimentão</option>
+                        <option value="Rabanete">Rabanete</option>
+                        <option value="Rúcula">Rúcula</option>
+                        <option value="Tomate">Tomate</option>
+                        <option value="Outros">Outros</option>
+                    </select>
+                </div>
+                <div id="other-hortalica-div" class="flex-col" style="display: none;">
+                    <label for="other-hortalica-input" class="font-semibold text-gray-700 mb-1">Nome da Hortaliça:</label>
+                    <input type="text" id="other-hortalica-input" class="p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#57996c]" placeholder="Ex: Batata-doce">
+                </div>
+                <div class="flex flex-col">
+                    <label for="plantio-date" class="font-semibold text-gray-700 mb-1">Data do Plantio:</label>
+                    <input type="date" id="plantio-date" class="p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#57996c]">
+                </div>
+                <div id="colheita-info" class="bg-gray-100 p-4 rounded-lg text-center hidden">
+                    <p class="text-sm text-gray-500">Tempo de Colheita (aprox.): <span id="tempo-colheita-span" class="font-semibold text-[#1a4d2e]">--</span></p>
+                    <p class="text-sm text-gray-500">Colheita Esperada: <span id="data-colheita-span" class="font-semibold text-[#1a4d2e]">--</span></p>
+                    <div class="mt-2"><span id="countdown-span" class="text-3xl font-bold text-[#57996c]">--</span></div>
+                    <p id="countdown-label" class="text-sm text-gray-500">dias restantes</p>
+                </div>
+                <div class="flex justify-end space-x-4 mt-4">
+                    <button id="clear-mapa-modal-btn" class="bg-red-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-600 transition duration-300">Limpar</button>
+                    <button id="save-mapa-modal-btn" class="bg-[#57996c] text-white font-bold py-2 px-4 rounded-lg hover:bg-[#4a855c] transition duration-300">Salvar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, onSnapshot, addDoc, getDocs, doc, setDoc, getDoc, deleteDoc, serverTimestamp, query, where, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // --- VARIÁVEIS GLOBAIS ---
+        // Acessa o ID do aplicativo do ambiente, com um fallback.
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        // Acessa a configuração do Firebase do ambiente.
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+        // Acessa o token de autenticação inicial do ambiente.
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        let db, auth, userId;
+        let firebaseInitialized = false;
+        // Armazena as tarefas concluídas localmente antes de serem salvas.
+        let localChanges = { completedTasks: [] }; 
+        let currentMapaLeiraId = null;
+        let countdownIntervals = {};
+        let profitChart;
+
+        // Dados internos de tempo de colheita para cada hortaliça.
+        const hortalicasData = {
+            "Abobrinha": { tempo_medio_dias: 60 },
+            "Alface": { tempo_medio_dias: 45 },
+            "Alho": { tempo_medio_dias: 120 },
+            "Alho-poró": { tempo_medio_dias: 120 },
+            "Beterraba": { tempo_medio_dias: 60 },
+            "Brócolis": { tempo_medio_dias: 60 },
+            "Cebolinha": { tempo_medio_dias: 60 },
+            "Cenoura": { tempo_medio_dias: 75 },
+            "Coentro": { tempo_medio_dias: 30 },
+            "Couve": { tempo_medio_dias: 60 },
+            "Couve-flor": { tempo_medio_dias: 90 },
+            "Manjericão": { tempo_medio_dias: 60 },
+            "Milho": { tempo_medio_dias: 90 },
+            "Morango": { tempo_medio_dias: 90 },
+            "Pepino": { tempo_medio_dias: 60 },
+            "Pimenta de cheiro": { tempo_medio_dias: 90 },
+            "Pimentão": { tempo_medio_dias: 120 },
+            "Rabanete": { tempo_medio_dias: 30 },
+            "Rúcula": { tempo_medio_dias: 40 },
+            "Tomate": { tempo_medio_dias: 90 }
+        };
+
+        // Preços médios de mercado (R$ por kg)
+        const precosMedios = {
+            "Abobrinha": 4.50,
+            "Alface": 5.00,
+            "Alho": 20.00,
+            "Alho-poró": 8.00,
+            "Beterraba": 3.50,
+            "Brócolis": 6.00,
+            "Cebolinha": 7.00,
+            "Cenoura": 4.00,
+            "Coentro": 8.00,
+            "Couve": 6.00,
+            "Couve-flor": 7.50,
+            "Manjericão": 12.00,
+            "Milho": 3.00,
+            "Morango": 15.00,
+            "Pepino": 3.80,
+            "Pimenta de cheiro": 25.00,
+            "Pimentão": 5.50,
+            "Rabanete": 6.50,
+            "Rúcula": 9.00,
+            "Tomate": 7.00,
+            "Outros": 5.00 // Preço padrão para 'Outros'
+        };
+
+        // --- ELEMENTOS DA UI ---
+        const menuPrincipal = document.getElementById('menu-principal');
+        const planoAcaoPanel = document.getElementById('plano-acao');
+        const visaoLeirasPanel = document.getElementById('visao-leiras');
+        const mapaHortaPanel = document.getElementById('mapa-horta');
+        const gerenciamentoPanel = document.getElementById('gerenciamento-painel');
+        
+        // Elementos do Plano de Ação
+        const statusMessagePlano = document.getElementById('status-message-plano');
+        const userIdDisplayEl = document.getElementById('user-id-display');
+        const taskGroupSelect = document.getElementById('task-group-select');
+        const subTasksChecklistEl = document.getElementById('sub-tasks-checklist');
+        const rotationTableBody = document.getElementById('rotation-table-body');
+        const turmaSelect = document.getElementById('turma-select');
+        const groupSelect = document.getElementById('group-select');
+        const weekDisplay = document.getElementById('week-display');
+        const subTaskForm = document.getElementById('sub-task-form');
+        const subTaskGroupNameInput = document.getElementById('sub-task-group-name');
+        const subTaskNameInput = document.getElementById('sub-task-name');
+        const subTaskEffortInput = document.getElementById('sub-task-effort');
+        const subTaskTimeInput = document.getElementById('sub-task-time');
+        const subEffortValueSpan = document.getElementById('sub-effort-value');
+        const subTimeValueSpan = document.getElementById('sub-time-value');
+        const leirasCheckboxContainerForm = document.getElementById('leiras-checkbox-container-form');
+        const leirasModal = document.getElementById('leiras-modal');
+        const modalTaskNameEl = document.getElementById('modal-task-name');
+        const leirasCheckboxContainerModal = document.getElementById('leiras-checkbox-container-modal');
+        const cancelLeirasModalBtn = document.getElementById('cancel-leiras-modal');
+        const saveLeirasModalBtn = document.getElementById('save-leiras-modal');
+        const saveTasksBtn = document.getElementById('save-tasks-btn');
+        const saveFeedbackEl = document.getElementById('save-feedback');
+        
+        // Elementos da Visão de Leiras
+        const statusMessageLeiras = document.getElementById('status-message-leiras');
+        const leirasGridContainer = document.getElementById('leiras-grid-container');
+        const loadingMessage = document.getElementById('loading-message');
+        const historyModal = document.getElementById('history-modal');
+        const modalLeiraIdEl = document.getElementById('modal-leira-id');
+        const modalBodyEl = document.getElementById('modal-body');
+        const closeModalBtn = document.getElementById('close-modal-btn');
+
+        // Elementos do Mapa da Horta
+        const mapaLeirasContainer = document.getElementById('mapa-leiras-container');
+        const mapaHortaLoading = mapaLeirasContainer.querySelector('p');
+        const mapaLeiraModal = document.getElementById('mapa-leira-modal');
+        const mapaModalLeiraId = document.getElementById('mapa-modal-leira-id');
+        const closeMapaModalBtn = document.getElementById('close-mapa-modal-btn');
+        const hortalicaSelect = document.getElementById('hortalica-select');
+        const otherHortalicaDiv = document.getElementById('other-hortalica-div');
+        const otherHortalicaInput = document.getElementById('other-hortalica-input');
+        const plantioDateInput = document.getElementById('plantio-date');
+        const saveMapaModalBtn = document.getElementById('save-mapa-modal-btn');
+        const clearMapaModalBtn = document.getElementById('clear-mapa-modal-btn');
+        const colheitaInfoDiv = document.getElementById('colheita-info');
+        const tempoColheitaSpan = document.getElementById('tempo-colheita-span');
+        const dataColheitaSpan = document.getElementById('data-colheita-span');
+        const countdownSpan = document.getElementById('countdown-span');
+        const countdownLabel = document.getElementById('countdown-label');
+
+        // Elementos do Gerenciamento da Horta
+        const btnGerenciamento = document.getElementById('btn-gerenciamento');
+        const producaoForm = document.getElementById('producao-form');
+        const producaoHortalicaSelect = document.getElementById('producao-hortalica');
+        const producaoPesoInput = document.getElementById('producao-peso');
+        const producaoCustoInput = document.getElementById('producao-custo');
+        const producaoHistoricoTableBody = document.getElementById('producao-historico-table-body');
+        const totalReceitaEl = document.getElementById('total-receita');
+        const totalCustoEl = document.getElementById('total-custo');
+        const totalLucroEl = document.getElementById('total-lucro');
+        const profitChartCanvas = document.getElementById('profit-chart');
+
+        // --- NAVEGAÇÃO ---
+        const btnPlanoAcao = document.getElementById('btn-plano-acao');
+        const btnVisaoLeiras = document.getElementById('btn-visao-leiras');
+        const btnMapaHorta = document.getElementById('btn-mapa-horta');
+        const btnsVoltarMenu = document.querySelectorAll('.btn-voltar-menu');
+
+        /**
+         * Exibe um painel específico e oculta os outros.
+         * @param {string} panelId - O ID do painel a ser exibido.
+         */
+        function showPanel(panelId) {
+            menuPrincipal.classList.add('hidden');
+            planoAcaoPanel.classList.add('hidden');
+            visaoLeirasPanel.classList.add('hidden');
+            mapaHortaPanel.classList.add('hidden');
+            gerenciamentoPanel.classList.add('hidden');
+            document.getElementById(panelId).classList.remove('hidden');
+            // Ajusta o alinhamento do corpo para o painel.
+            document.body.style.alignItems = 'flex-start';
+            document.body.style.justifyContent = 'flex-start';
+            document.body.style.minHeight = 'auto';
+        }
+
+        /**
+         * Exibe o menu principal e oculta os painéis.
+         */
+        function showMenu() {
+            menuPrincipal.classList.remove('hidden');
+            planoAcaoPanel.classList.add('hidden');
+            visaoLeirasPanel.classList.add('hidden');
+            mapaHortaPanel.classList.add('hidden');
+            gerenciamentoPanel.classList.add('hidden');
+            // Retorna o alinhamento do corpo para o centro para o menu.
+            document.body.style.alignItems = 'center';
+            document.body.style.justifyContent = 'center';
+            document.body.style.minHeight = '100vh';
+        }
+
+        btnPlanoAcao.addEventListener('click', () => showPanel('plano-acao'));
+        btnVisaoLeiras.addEventListener('click', () => {
+            showPanel('visao-leiras');
+            // Processa e renderiza os dados das leiras ao abrir a seção.
+            if (firebaseInitialized) {
+                processAndRenderLeiras();
+            }
+        });
+        btnMapaHorta.addEventListener('click', () => {
+            showPanel('mapa-horta');
+            if (firebaseInitialized) {
+                renderHortaMap();
+            }
+        });
+        btnGerenciamento.addEventListener('click', () => {
+            showPanel('gerenciamento-painel');
+            if (firebaseInitialized) {
+                setupGerenciamentoPanel();
+            }
+        });
+        btnsVoltarMenu.forEach(btn => btn.addEventListener('click', showMenu));
+
+        // --- INICIALIZAÇÃO GERAL E FIREBASE ---
+        /**
+         * Inicializa o Firebase, autentica o usuário e define as referências do banco de dados.
+         * Adicionado um listener de autenticação para garantir que as operações do Firestore
+         * só ocorram após o usuário ser autenticado, evitando erros de permissão.
+         */
+        async function initializeFirebase() {
+            if (firebaseInitialized) return;
+            try {
+                if (!firebaseConfig) throw new Error("Configuração do Firebase não encontrada.");
+                
+                const app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+                
+                statusMessagePlano.textContent = 'Autenticando...';
+                statusMessageLeiras.textContent = 'Autenticando...';
+                
+                // Usa onAuthStateChanged para garantir que as operações do Firestore só comecem
+                // após o estado de autenticação ser carregado.
+                onAuthStateChanged(auth, async (user) => {
+                    if (user) {
+                        userId = user.uid;
+                        userIdDisplayEl.textContent = userId;
+                        statusMessagePlano.textContent = 'Conectado';
+                        statusMessageLeiras.textContent = 'Conectado';
+                        firebaseInitialized = true;
+                        console.log("Firebase inicializado com sucesso.");
+                        
+                        // Chamadas iniciais para carregar dados após a autenticação
+                        await onFirebaseReady();
+                    } else {
+                         // Autentica anonimamente se não houver usuário logado
+                        await signInAnonymously(auth);
+                    }
+                });
+
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
+
+            } catch (error) {
+                console.error("Erro na inicialização do Firebase:", error);
+                statusMessagePlano.textContent = 'Erro de conexão.';
+                statusMessageLeiras.textContent = 'Erro de conexão.';
+            }
+        }
+        
+        /**
+         * Função que é executada após o Firebase estar pronto e autenticado.
+         */
+        async function onFirebaseReady() {
+             // Carrega os dados salvos do usuário ao iniciar
+            const userDocRef = doc(db, `artifacts/${appId}/public/data/user_data`, userId);
+            try {
+                const userDocSnap = await getDoc(userDocRef);
+                if(userDocSnap.exists()) {
+                    const userData = userDocSnap.data();
+                    const prefs = userData.prefs || {};
+                    const tasks = userData.tasks || { completedTasks: [] };
+                    turmaSelect.value = prefs.turma || '';
+                    groupSelect.value = prefs.grupo || '';
+                    taskGroupSelect.value = tasks.selectedGroup || '';
+                    localChanges.completedTasks = tasks.completedTasks || [];
+                    fetchAndRenderSubTasks(tasks.selectedGroup, localChanges.completedTasks);
+                }
+            } catch (error) {
+                console.error("Erro ao carregar dados do usuário:", error);
+            }
+        }
+
+        // --- LÓGICA DO PLANO DE AÇÃO ---
+        let currentTaskNameForModal = '';
+        // Dados de tarefas pré-definidas.
+        const subTaskData = {
+            "Controle e Plantio de Sementes": [{ name: "Preparar as sementeiras com o solo e adubo adequados.", effort: 20, time: 20 }, { name: "Plantar as sementes e registrar a quantidade e tipo de hortaliça.", effort: 60, time: 45 }, { name: "Garantir que as sementes estejam em um ambiente ideal para germinação.", effort: 20, time: 10 }],
+            "Controle de Plantio e Colheita": [{ name: "Transplantar as mudas das sementeiras para as leiras.", effort: 80, time: 50 }, { name: "Registrar a data de plantio e a previsão de colheita.", effort: 50, time: 15 }, { name: "Realizar a colheita das hortaliças maduras e registrar a quantidade.", effort: 90, time: 50 }],
+            "Limpeza e Manutenção das Leiras": [{ name: "Realizar a capina para remover ervas daninhas.", effort: 60, time: 30 }, { name: "Revolver a terra para oxigenar o solo.", effort: 70, time: 25 }, { name: "Adubar as leiras para garantir os nutrientes necessários.", effort: 50, time: 20 }],
+            "Prevenção de Pragas": [{ name: "Inspecionar as leiras para identificar sinais de pragas ou doenças.", effort: 70, time: 30 }, { name: "Aplicar defensivos naturais ou tomar as medidas corretivas necessárias.", effort: 80, time: 40 }, { name: "Registrar os problemas encontrados e as ações tomadas.", effort: 50, time: 10 }],
+            "Irrigação e Manutenção da Hidroponia": [{ name: "Regar as leiras de acordo com a necessidade.", effort: 30, time: 15 }, { name: "Limpar as caixas dos peixes e verificar a bomba do sistema hidropônico.", effort: 60, time: 30 }, { name: "Medir o pH da água para garantir a qualidade.", effort: 40, time: 10 }],
+            "Gerenciamento da Horta": [{ name: "Pesar a colheita do período e analisar os dados de produção.", effort: 75, time: 45 }, { name: "Calcular a rentabilidade da horta, considerando custos e possíveis receitas.", effort: 90, time: 50 }, { name: "Analisar a demanda para planejar o plantio de novas mudas.", effort: 80, time: 30 }]
+        };
+        // Ordem dos grupos de tarefas para a tabela de rodízio.
+        const groupTasksOrder = ["Controle e Plantio de Sementes", "Controle de Plantio e Colheita", "Limpeza e Manutenção das Leiras", "Prevenção de Pragas", "Irrigação e Manutenção da Hidroponia", "Gerenciamento da Horta"];
+
+        /**
+         * Calcula o número da semana para uma determinada data.
+         * @param {Date} d - A data.
+         * @returns {number} O número da semana.
+         */
+        function getWeekNumber(d) {
+            d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+            d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
+            const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+            return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+        }
+
+        /**
+         * Gera a tabela de rodízio de tarefas para as próximas semanas.
+         * @param {number} currentWeek - O número da semana atual.
+         */
+        function generateRotationTable(currentWeek) {
+            rotationTableBody.innerHTML = '';
+            const numGroups = groupTasksOrder.length;
+            const currentWeekAdjusted = currentWeek - 1;
+            for (let i = 0; i < 2; i++) {
+                const weekNumber = currentWeek + i;
+                const row = document.createElement('tr');
+                row.className = `border-b border-gray-200 ${i === 0 ? 'bg-[#d4e7d4] font-semibold' : 'bg-white'}`;
+                row.innerHTML = `<td class="p-4 font-bold ${i === 0 ? 'text-[#1a4d2e]' : 'text-gray-700'}">Semana ${weekNumber}</td>`;
+                for (let j = 0; j < numGroups; j++) {
+                    const taskIndex = (currentWeekAdjusted + i + j) % numGroups;
+                    row.innerHTML += `<td class="p-4 text-gray-700">${groupTasksOrder[taskIndex]}</td>`;
+                }
+                rotationTableBody.appendChild(row);
+            }
+        }
+
+        /**
+         * Busca e renderiza as sub-tarefas para um grupo selecionado.
+         * @param {string} selectedGroup - O nome do grupo de tarefas.
+         * @param {Array<Object>} completedTasks - As tarefas já concluídas.
+         */
+        async function fetchAndRenderSubTasks(selectedGroup, completedTasks) {
+            const hardcodedTasks = subTaskData[selectedGroup] || [];
+            try {
+                const userSubTasksQuery = query(collection(db, `artifacts/${appId}/users/${userId}/sub_tasks`), where("groupName", "==", selectedGroup));
+                const querySnapshot = await getDocs(userSubTasksQuery);
+                const userTasks = [];
+                querySnapshot.forEach(doc => userTasks.push({ id: doc.id, ...doc.data() }));
+                
+                const combinedTasks = [...hardcodedTasks, ...userTasks];
+                if (combinedTasks.length === 0) {
+                    subTasksChecklistEl.innerHTML = '<p class="text-center text-gray-500 italic">Nenhuma tarefa encontrada.</p>';
+                    return;
+                }
+
+                let html = `<ul class="sub-task-list">`;
+                combinedTasks.forEach(task => {
+                    const completedTaskData = completedTasks.find(t => t.name === task.name);
+                    const isCompleted = !!completedTaskData;
+                    const leirasText = isCompleted && Array.isArray(completedTaskData.leiras) && completedTaskData.leiras.length > 0 ? completedTaskData.leiras.sort((a, b) => a - b).join(', ') : 'N/A';
+                    html += `<li class="sub-task-item ${isCompleted ? 'completed' : ''}"><div class="flex items-center w-full"><input type="checkbox" data-task-name="${task.name}" ${isCompleted ? 'checked' : ''}><label class="text-gray-700 flex-1 cursor-pointer select-none">${task.name}</label><div class="flex flex-col sm:flex-row sm:items-center sm:space-x-4 ml-auto text-right"><span class="text-sm text-gray-500 whitespace-nowrap">Esforço: ${task.effort}% | Tempo: ${task.time} min</span><span class="text-sm whitespace-nowrap ${isCompleted && Array.isArray(completedTaskData.leiras) && completedTaskData.leiras.length > 0 ? 'text-gray-800 font-semibold' : 'text-gray-500 italic'}">Leiras: ${leirasText}</span></div></div>${task.id ? `<button class="absolute top-1/2 -translate-y-1/2 right-2 p-2 rounded-full text-red-500 hover:bg-red-100 transition-colors duration-200 delete-sub-task-btn" data-id="${task.id}"><i class="fas fa-trash-alt"></i></button>` : ''}</li>`;
+                });
+                html += `</ul>`;
+                subTasksChecklistEl.innerHTML = html;
+            } catch (error) {
+                 console.error("Erro ao buscar sub-tarefas:", error);
+                 subTasksChecklistEl.innerHTML = '<p class="text-center text-red-500 italic">Erro ao carregar tarefas.</p>';
+            }
+        }
+
+        /**
+         * Gera os checkboxes para a seleção de leiras em um contêiner.
+         * @param {HTMLElement} container - O contêiner para os checkboxes.
+         */
+        function generateLeirasCheckboxes(container) {
+            let html = '';
+            for (let i = 0; i <= 47; i++) {
+                html += `<div><input type="checkbox" id="leira-${i}-${container.id}" value="${i}" class="hidden"><label for="leira-${i}-${container.id}" class="text-sm p-1 rounded-md cursor-pointer select-none">${i}</label></div>`;
+            }
+            container.innerHTML = html;
+        }
+
+        /**
+         * Abre o modal de seleção de leiras para uma tarefa.
+         * @param {string} taskName - O nome da tarefa.
+         * @param {Array<number>} completedLeiras - Leiras já concluídas para esta tarefa.
+         */
+        function openLeirasModal(taskName, completedLeiras = []) {
+            currentTaskNameForModal = taskName;
+            modalTaskNameEl.textContent = taskName;
+            leirasCheckboxContainerModal.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = completedLeiras.includes(parseInt(cb.value)));
+            leirasModal.classList.add('open');
+        }
+
+        /**
+         * Fecha o modal de seleção de leiras.
+         */
+        function closeLeirasModal() {
+            leirasModal.classList.remove('open');
+        }
+
+        // --- LÓGICA DA VISÃO DE LEIRAS (COMPARTILHADA) ---
+        // Cores de borda para diferentes tipos de tarefas.
+        const taskColors = {
+            "Controle e Plantio de Sementes": "border-blue-500", "Controle de Plantio e Colheita": "border-green-500", "Limpeza e Manutenção das Leiras": "border-yellow-500", "Prevenção de Pragas": "border-red-500", "Irrigação e Manutenção da Hidroponia": "border-cyan-500", "Gerenciamento da Horta": "border-purple-500",
+        };
+
+        /**
+         * Processa e renderiza os dados das leiras, buscando informações de todos os usuários.
+         */
+        async function processAndRenderLeiras() {
+            if (!db || !firebaseInitialized) return;
+            loadingMessage.classList.remove('hidden');
+            leirasGridContainer.innerHTML = '';
+            
+            try {
+                const leirasData = {};
+                for (let i = 0; i <= 47; i++) leirasData[i] = { history: [] };
+
+                // Busca os dados de todos os usuários da coleção pública
+                const allUserDataCollection = collection(db, `artifacts/${appId}/public/data/user_data`);
+                const allUsersSnapshot = await getDocs(allUserDataCollection);
+
+                allUsersSnapshot.forEach(userDoc => {
+                    const userData = userDoc.data();
+                    const taskData = userData.tasks || {};
+                    const userPrefs = userData.prefs || {};
+
+                    if (taskData.completedTasks) {
+                        taskData.completedTasks.forEach(completedTask => {
+                            if (completedTask.leiras) {
+                                completedTask.leiras.forEach(leiraId => {
+                                    if (leirasData[leiraId]) {
+                                        leirasData[leiraId].history.push({
+                                            userId: userDoc.id,
+                                            name: completedTask.name,
+                                            leiras: completedTask.leiras,
+                                            turma: userPrefs.turma,
+                                            grupo: userPrefs.grupo,
+                                            semana: userPrefs.semana,
+                                            // Converte o carimbo de data/hora do servidor para milissegundos para ordenação.
+                                            timestamp: taskData.updatedAt ? taskData.updatedAt.toMillis() : Date.now()
+                                        });
+                                    }
+                                });
+                            }
+                        });
+                    }
+                });
+                renderLeirasGrid(leirasData);
+            } catch (error) {
+                 console.error("Erro ao processar e renderizar leiras:", error);
+                 leirasGridContainer.innerHTML = '<p class="col-span-full text-center text-red-500 text-xl py-10">Erro ao carregar dados das leiras.</p>';
+            }
+        }
+
+        /**
+         * Renderiza a grade de cards das leiras com base nos dados.
+         * @param {Object} leirasData - Dados do histórico de cada leira.
+         */
+        function renderLeirasGrid(leirasData) {
+            leirasGridContainer.innerHTML = '';
+            loadingMessage.classList.add('hidden');
+
+            for (let i = 0; i <= 47; i++) {
+                const leira = leirasData[i];
+                leira.history.sort((a, b) => b.timestamp - a.timestamp);
+                const lastTask = leira.history.length > 0 ? leira.history[0] : null;
+                const card = document.createElement('div');
+                card.className = `leira-card bg-white p-3 rounded-lg shadow-md ${lastTask ? (taskColors[lastTask.name] || 'border-gray-300') : 'border-gray-300'} flex flex-col justify-between`;
+                card.innerHTML = `<div class="flex-grow"><h3 class="font-bold text-xl text-center text-gray-700 mb-2">${i}</h3>${lastTask ? `<p class="text-xs text-gray-500 mb-1 truncate" title="${lastTask.name}"><i class="fas fa-tasks mr-1 text-gray-400"></i>${lastTask.name}</p><p class="text-xs text-gray-500"><i class="fas fa-calendar-week mr-1 text-gray-400"></i>Semana: <span class="font-semibold">${lastTask.semana}</span></p><p class="text-xs text-gray-500"><i class="fas fa-users mr-1 text-gray-400"></i>Por: G${lastTask.grupo}</p>` : `<p class="text-sm text-center text-gray-400 italic mt-2">Vazia</p>`}</div><button data-leira-id="${i}" class="history-btn w-full mt-3 bg-gray-200 text-gray-700 text-xs font-bold py-1 px-2 rounded hover:bg-gray-300 transition duration-200">Histórico</button>`;
+                leirasGridContainer.appendChild(card);
+            }
+
+            // Adiciona listeners para os botões de histórico.
+            leirasGridContainer.querySelectorAll('.history-btn').forEach(button => {
+                button.addEventListener('click', () => {
+                    const leiraId = button.dataset.leiraId;
+                    openHistoryModal(leiraId, leirasData[leiraId].history);
+                });
+            });
+        }
+
+        /**
+         * Abre o modal de histórico de uma leira.
+         * @param {string} leiraId - O ID da leira.
+         * @param {Array<Object>} history - O histórico da leira.
+         */
+        function openHistoryModal(leiraId, history) {
+            modalLeiraIdEl.textContent = leiraId;
+            modalBodyEl.innerHTML = history.length === 0 ? '<p class="text-gray-500 italic">Nenhum registro.</p>' : '';
+            history.forEach(item => {
+                const historyItem = document.createElement('div');
+                historyItem.className = 'history-item p-3';
+                historyItem.innerHTML = `<div class="flex justify-between items-start"><div><p class="font-semibold text-gray-800">${item.name}</p><div class="flex flex-wrap text-sm text-gray-500 mt-1"><span class="mr-4"><i class="fas fa-calendar-week mr-1"></i>Semana: ${item.semana}</span><span><i class="fas fa-users mr-1"></i>Turma: ${item.turma} / Grupo: ${item.grupo}</span></div></div><button class="delete-history-btn text-red-500 hover:text-red-700" data-leira-id="${leiraId}" data-user-id="${item.userId}" data-task-name="${item.name}" title="Excluir registro"><i class="fas fa-trash-alt"></i></button></div>`;
+                modalBodyEl.appendChild(historyItem);
+            });
+            historyModal.classList.add('open');
+        }
+
+        /**
+         * Lida com a exclusão de um registro de histórico.
+         * @param {string} leiraId - O ID da leira.
+         * @param {string} taskUserId - O ID do usuário que criou a tarefa.
+         * @param {string} taskName - O nome da tarefa a ser excluída.
+         */
+        async function handleDeleteHistoryEntry(leiraId, taskUserId, taskName) {
+            const userDocRef = doc(db, `artifacts/${appId}/public/data/user_data`, taskUserId);
+            try {
+                const docSnap = await getDoc(userDocRef);
+                if (docSnap.exists()) {
+                    const userData = docSnap.data();
+                    const taskData = userData.tasks || { completedTasks: [] };
+                    const taskToUpdate = taskData.completedTasks.find(t => t.name === taskName);
+                    if (taskToUpdate && taskToUpdate.leiras) {
+                        taskToUpdate.leiras = taskToUpdate.leiras.filter(l => l !== parseInt(leiraId));
+                        await updateDoc(userDocRef, { "tasks.completedTasks": taskData.completedTasks });
+                        closeHistoryModal();
+                        // Renderiza novamente a grade das leiras para refletir a mudança.
+                        await processAndRenderLeiras();
+                    }
+                }
+            } catch (error) {
+                console.error("Erro ao excluir histórico de entrada:", error);
+            }
+        }
+
+        /**
+         * Fecha o modal de histórico.
+         */
+        function closeHistoryModal() { historyModal.classList.remove('open'); }
+
+        // --- LÓGICA DO MAPA DA HORTA ---
+        /**
+         * Renderiza a grade de leiras para o Mapa da Horta.
+         */
+        async function renderHortaMap() {
+            if (!db || !firebaseInitialized) return;
+            mapaHortaLoading.classList.remove('hidden');
+            mapaLeirasContainer.innerHTML = '';
+            
+            // Limpa todos os intervalos de contagem regressiva antigos.
+            Object.values(countdownIntervals).forEach(clearInterval);
+            countdownIntervals = {};
+
+            try {
+                const mapCollection = collection(db, `artifacts/${appId}/public/data/leiras_map`);
+                const querySnapshot = await getDocs(mapCollection);
+                const leirasMapData = {};
+                querySnapshot.forEach(doc => leirasMapData[doc.id] = doc.data());
+
+                for (let i = 0; i <= 47; i++) {
+                    const leiraId = i.toString();
+                    const leiraData = leirasMapData[leiraId] || {};
+                    const card = document.createElement('div');
+                    card.id = `mapa-leira-${leiraId}`;
+                    card.classList.add('leira-map-card', leiraData.hortalica ? 'plantada' : 'vazia');
+                    
+                    let hortalicaNome = leiraData.hortalica || 'Vazia';
+                    let dataPlantio = leiraData.data_plantio || 'N/A';
+                    let diasRestantes = '--';
+                    
+                    if (leiraData.data_plantio && hortalicasData[leiraData.hortalica]) {
+                        const plantioTimestamp = new Date(leiraData.data_plantio).getTime();
+                        const tempoCrescimento = hortalicasData[leiraData.hortalica]?.tempo_medio_dias * 24 * 60 * 60 * 1000 || 0;
+                        const colheitaTimestamp = plantioTimestamp + tempoCrescimento;
+                        const agora = Date.now();
+                        const diffTime = colheitaTimestamp - agora;
+                        const dias = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                        diasRestantes = dias > 0 ? dias : 0;
+                        if (diasRestantes <= 7 && diasRestantes > 0) { // Sinaliza leiras próximas da colheita
+                            card.classList.add('pronta');
+                        }
+                        if (diasRestantes === 0) {
+                            diasRestantes = 'Pronta!';
+                        } else if (diasRestantes < 0) {
+                            diasRestantes = `Atrasada`;
+                        }
+
+                        // Inicia o contador regressivo para esta leira
+                        if (typeof countdownIntervals[leiraId] !== 'undefined') {
+                            clearInterval(countdownIntervals[leiraId]);
+                        }
+                        if (diffTime > 0) {
+                            countdownIntervals[leiraId] = setInterval(() => {
+                                const now = Date.now();
+                                const remainingTime = colheitaTimestamp - now;
+                                const remainingDays = Math.ceil(remainingTime / (1000 * 60 * 60 * 24));
+                                const targetCountdownEl = document.getElementById(`countdown-${leiraId}`);
+                                const targetCountdownLabelEl = document.getElementById(`countdown-label-${leiraId}`);
+                                if (targetCountdownEl) {
+                                    if (remainingDays > 0) {
+                                        targetCountdownEl.textContent = remainingDays;
+                                        if (targetCountdownLabelEl) targetCountdownLabelEl.textContent = 'dias restantes';
+                                        if (remainingDays <= 7 && !card.classList.contains('pronta')) {
+                                            card.classList.add('pronta');
+                                        }
+                                    } else {
+                                        targetCountdownEl.textContent = 'Pronta!';
+                                        if (targetCountdownLabelEl) targetCountdownLabelEl.textContent = "";
+                                        card.classList.remove('pronta');
+                                        clearInterval(countdownIntervals[leiraId]);
+                                    }
+                                }
+                            }, 60 * 60 * 1000); // Atualiza a cada hora para o contador de dias.
+                        }
+                    } else if (leiraData.data_plantio && leiraData.hortalica === "Outros") {
+                        hortalicaNome = leiraData.outro_nome || "Outros";
+                    }
+                    
+                    card.innerHTML = `
+                        <h4 class="font-bold text-lg mb-1">Leira ${leiraId}</h4>
+                        <div class="flex items-center justify-center text-sm mb-2"><i class="fas fa-leaf mr-1 text-green-700"></i> <span class="truncate">${hortalicaNome}</span></div>
+                        <div class="text-xs text-gray-500 mb-2">
+                            <span class="block">${dataPlantio !== 'N/A' ? 'Plantio: ' + dataPlantio : 'Plantio: N/A'}</span>
+                            <span id="countdown-${leiraId}" class="block font-semibold text-[#1a4d2e] mt-1">${diasRestantes}</span>
+                            <span id="countdown-label-${leiraId}" class="block text-xs italic text-gray-400">${diasRestantes === '--' ? '' : 'dias restantes'}</span>
+                        </div>
+                    `;
+                    card.addEventListener('click', () => openMapaModal(leiraId, leiraData));
+                    mapaLeirasContainer.appendChild(card);
+                }
+
+                mapaHortaLoading.classList.add('hidden');
+            } catch (error) {
+                 console.error("Erro ao renderizar mapa da horta:", error);
+                 mapaLeirasContainer.innerHTML = '<p class="col-span-full text-center text-red-500 text-xl py-10">Erro ao carregar o mapa da horta.</p>';
+            }
+        }
+        
+        /**
+         * Abre o modal do Mapa da Horta.
+         * @param {string} leiraId - O ID da leira.
+         * @param {Object} leiraData - Os dados da leira.
+         */
+        function openMapaModal(leiraId, leiraData) {
+            currentMapaLeiraId = leiraId;
+            mapaModalLeiraId.textContent = leiraId;
+            
+            // Preenche o modal com os dados existentes
+            hortalicaSelect.value = leiraData.hortalica || '';
+            plantioDateInput.value = leiraData.data_plantio || '';
+            otherHortalicaInput.value = leiraData.outro_nome || '';
+            
+            // Mostra/esconde o campo de "Outros"
+            if (leiraData.hortalica === 'Outros') {
+                otherHortalicaDiv.style.display = 'flex';
+            } else {
+                otherHortalicaDiv.style.display = 'none';
+            }
+
+            updateMapaModalInfo(leiraData.hortalica, leiraData.data_plantio);
+
+            mapaLeiraModal.classList.add('open');
+        }
+
+        /**
+         * Atualiza as informações de colheita no modal do mapa.
+         * @param {string} hortalica - A hortaliça selecionada.
+         * @param {string} plantioDate - A data de plantio.
+         */
+        function updateMapaModalInfo(hortalica, plantioDate) {
+            if (hortalica && plantioDate && hortalicasData[hortalica]) {
+                const tempoMedio = hortalicasData[hortalica].tempo_medio_dias;
+                tempoColheitaSpan.textContent = `${tempoMedio} dias`;
+                
+                const dataPlantio = new Date(plantioDate + 'T00:00:00'); // Garante que a data seja tratada corretamente
+                const dataColheitaCalc = new Date(dataPlantio);
+                dataColheitaCalc.setDate(dataColheitaCalc.getDate() + tempoMedio);
+                
+                const dataColheita = dataColheitaCalc.toLocaleDateString('pt-BR');
+                dataColheitaSpan.textContent = dataColheita;
+
+                const hoje = new Date();
+                const diffTime = dataColheitaCalc.getTime() - hoje.getTime();
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                
+                if (diffDays >= 0) {
+                    countdownSpan.textContent = diffDays;
+                    countdownLabel.textContent = 'dias restantes';
+                } else {
+                    countdownSpan.textContent = 'Pronta!';
+                    countdownLabel.textContent = '';
+                }
+
+                colheitaInfoDiv.classList.remove('hidden');
+            } else {
+                 // Esconde as informações de colheita para "Outros" ou dados incompletos
+                colheitaInfoDiv.classList.add('hidden');
+            }
+        }
+        
+        closeMapaModalBtn.addEventListener('click', () => {
+            mapaLeiraModal.classList.remove('open');
+        });
+
+        hortalicaSelect.addEventListener('change', (e) => {
+            const selectedValue = e.target.value;
+            if (selectedValue === 'Outros') {
+                otherHortalicaDiv.style.display = 'flex';
+            } else {
+                otherHortalicaDiv.style.display = 'none';
+            }
+            updateMapaModalInfo(selectedValue, plantioDateInput.value);
+        });
+        
+        plantioDateInput.addEventListener('change', () => updateMapaModalInfo(hortalicaSelect.value, plantioDateInput.value));
+        
+        saveMapaModalBtn.addEventListener('click', async () => {
+            const hortalica = hortalicaSelect.value;
+            const outroNome = otherHortalicaInput.value;
+            const dataPlantio = plantioDateInput.value;
+            
+            if (!hortalica || !dataPlantio || (hortalica === 'Outros' && !outroNome)) {
+                // Poderia mostrar uma mensagem de erro na tela.
+                console.error("Hortaliça e data de plantio são obrigatórios.");
+                return;
+            }
+
+            const leiraRef = doc(db, `artifacts/${appId}/public/data/leiras_map`, currentMapaLeiraId);
+            try {
+                const dataToSave = {
+                    hortalica: hortalica,
+                    data_plantio: dataPlantio,
+                    data_atualizacao: serverTimestamp(),
+                };
+                
+                if (hortalica === 'Outros') {
+                    dataToSave.outro_nome = outroNome;
+                }
+
+                await setDoc(leiraRef, dataToSave, { merge: true });
+
+                mapaLeiraModal.classList.remove('open');
+                renderHortaMap(); // Recarrega o mapa para mostrar a atualização
+            } catch (error) {
+                console.error("Erro ao salvar dados do mapa:", error);
+            }
+        });
+
+        clearMapaModalBtn.addEventListener('click', async () => {
+             const leiraRef = doc(db, `artifacts/${appId}/public/data/leiras_map`, currentMapaLeiraId);
+             try {
+                await deleteDoc(leiraRef);
+                mapaLeiraModal.classList.remove('open');
+                renderHortaMap();
+             } catch (error) {
+                console.error("Erro ao limpar dados da leira:", error);
+             }
+        });
+
+
+        // --- LÓGICA DO GERENCIAMENTO ---
+        /**
+         * Configura o painel de gerenciamento com ouvintes de eventos e o listener do Firestore.
+         */
+        function setupGerenciamentoPanel() {
+            if (!db || !firebaseInitialized) return;
+
+            // Define o listener para a coleção de produção
+            const producaoCollection = collection(db, `artifacts/${appId}/public/data/producao`);
+            onSnapshot(producaoCollection, (snapshot) => {
+                const producoes = [];
+                snapshot.forEach(doc => {
+                    producoes.push({ id: doc.id, ...doc.data() });
+                });
+                renderGerenciamentoData(producoes);
+            }, (error) => {
+                console.error("Erro no listener de produção:", error);
+            });
+        }
+
+        /**
+         * Renderiza os dados na tabela e no gráfico de gerenciamento.
+         * @param {Array<Object>} producoes - A lista de documentos de produção do Firestore.
+         */
+        function renderGerenciamentoData(producoes) {
+            let totalReceita = 0;
+            let totalCusto = 0;
+            const producaoPorHortalica = {};
+
+            producaoHistoricoTableBody.innerHTML = '';
+            
+            if (producoes.length === 0) {
+                producaoHistoricoTableBody.innerHTML = '<tr><td colspan="7" class="text-center text-gray-500 py-4">Nenhum dado de produção registrado.</td></tr>';
+            } else {
+                producoes.forEach(p => {
+                    const preco = precosMedios[p.hortalica] || precosMedios["Outros"];
+                    const receita = p.peso * preco;
+                    const lucro = receita - p.custo;
+
+                    totalReceita += receita;
+                    totalCusto += p.custo;
+
+                    if (!producaoPorHortalica[p.hortalica]) {
+                        producaoPorHortalica[p.hortalica] = {
+                            lucro: 0,
+                            receita: 0,
+                            custo: 0
+                        };
+                    }
+                    producaoPorHortalica[p.hortalica].lucro += lucro;
+                    producaoPorHortalica[p.hortalica].receita += receita;
+                    producaoPorHortalica[p.hortalica].custo += p.custo;
+
+                    const dataFormatada = p.data_registro ? new Date(p.data_registro.toDate()).toLocaleDateString('pt-BR') : 'N/A';
+                    
+                    const row = document.createElement('tr');
+                    row.className = 'border-b border-gray-200 hover:bg-gray-100 transition-colors duration-200';
+                    row.innerHTML = `
+                        <td class="p-4 text-gray-700 whitespace-nowrap">${dataFormatada}</td>
+                        <td class="p-4 text-gray-700">${p.hortalica}</td>
+                        <td class="p-4 text-gray-700">${p.peso.toFixed(2)} kg</td>
+                        <td class="p-4 text-gray-700">R$ ${p.custo.toFixed(2)}</td>
+                        <td class="p-4 text-gray-700">R$ ${receita.toFixed(2)}</td>
+                        <td class="p-4 font-semibold ${lucro >= 0 ? 'text-green-600' : 'text-red-600'}">R$ ${lucro.toFixed(2)}</td>
+                        <td class="p-4 text-center">
+                            <button data-id="${p.id}" class="delete-producao-btn text-red-500 hover:text-red-700 transition-colors duration-200">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </td>
+                    `;
+                    producaoHistoricoTableBody.appendChild(row);
+                });
+            }
+
+            const totalLucro = totalReceita - totalCusto;
+            totalReceitaEl.textContent = `R$ ${totalReceita.toFixed(2)}`;
+            totalCustoEl.textContent = `R$ ${totalCusto.toFixed(2)}`;
+            totalLucroEl.textContent = `R$ ${totalLucro.toFixed(2)}`;
+            totalLucroEl.className = `text-2xl font-bold ${totalLucro >= 0 ? 'text-green-600' : 'text-red-600'}`;
+
+            // Atualiza o gráfico de lucro
+            updateProfitChart(producaoPorHortalica);
+        }
+        
+        /**
+         * Atualiza o gráfico de lucro por hortaliça.
+         * @param {Object} data - Dados de lucro por hortaliça.
+         */
+        function updateProfitChart(data) {
+            const labels = Object.keys(data);
+            const lucroData = labels.map(label => data[label].lucro);
+            const backgroundColors = lucroData.map(lucro => lucro >= 0 ? '#4a855c' : '#ef4444');
+
+            if (profitChart) {
+                profitChart.data.labels = labels;
+                profitChart.data.datasets[0].data = lucroData;
+                profitChart.data.datasets[0].backgroundColor = backgroundColors;
+                profitChart.update();
+            } else {
+                const ctx = profitChartCanvas.getContext('2d');
+                profitChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Lucro (R$)',
+                            data: lucroData,
+                            backgroundColor: backgroundColors,
+                            borderRadius: 5,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Lucro (R$)',
+                                    color: '#1a4d2e'
+                                },
+                                ticks: {
+                                    color: '#555'
+                                }
+                            },
+                            x: {
+                                ticks: {
+                                    color: '#555'
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return `R$ ${context.parsed.y.toFixed(2)}`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+        
+        // Listener para o formulário de registro de produção
+        producaoForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const hortalica = producaoHortalicaSelect.value;
+            const peso = Number(producaoPesoInput.value);
+            const custo = Number(producaoCustoInput.value);
+
+            const producaoRef = collection(db, `artifacts/${appId}/public/data/producao`);
+            try {
+                await addDoc(producaoRef, {
+                    hortalica: hortalica,
+                    peso: peso,
+                    custo: custo,
+                    data_registro: serverTimestamp()
+                });
+            } catch (error) {
+                console.error("Erro ao adicionar produção:", error);
+            }
+
+            producaoForm.reset();
+        });
+
+        // Listener para o botão de exclusão
+        producaoHistoricoTableBody.addEventListener('click', async (e) => {
+            const deleteButton = e.target.closest('.delete-producao-btn');
+            if (deleteButton) {
+                const docId = deleteButton.dataset.id;
+                try {
+                    await deleteDoc(doc(db, `artifacts/${appId}/public/data/producao`, docId));
+                } catch (error) {
+                    console.error("Erro ao excluir documento de produção:", error);
+                }
+            }
+        });
+
+
+        // --- SETUP DOS EVENT LISTENERS ---
+        /**
+         * Configura todos os ouvintes de eventos da aplicação.
+         */
+        function setupEventListeners() {
+            initializeFirebase();
+            
+            // --- Listeners do Plano de Ação ---
+            const currentWeek = getWeekNumber(new Date());
+            weekDisplay.textContent = currentWeek;
+            generateRotationTable(currentWeek);
+            generateLeirasCheckboxes(leirasCheckboxContainerForm);
+            generateLeirasCheckboxes(leirasCheckboxContainerModal);
+
+            taskGroupSelect.addEventListener('change', (e) => {
+                subTaskGroupNameInput.value = e.target.value;
+                localChanges.completedTasks = []; // Limpa tarefas ao mudar de grupo
+                if (firebaseInitialized) {
+                    fetchAndRenderSubTasks(e.target.value, []);
+                }
+            });
+
+            subTasksChecklistEl.addEventListener('change', (e) => {
+                if (e.target.type === 'checkbox') {
+                    const taskName = e.target.dataset.taskName;
+                    const existingTaskIndex = localChanges.completedTasks.findIndex(t => t.name === taskName);
+                    if (e.target.checked) {
+                        openLeirasModal(taskName, existingTaskIndex !== -1 ? localChanges.completedTasks[existingTaskIndex].leiras : []);
+                    } else {
+                        if (existingTaskIndex !== -1) {
+                            localChanges.completedTasks.splice(existingTaskIndex, 1);
+                        }
+                    }
+                }
+            });
+
+            saveLeirasModalBtn.addEventListener('click', () => {
+                const selectedLeiras = Array.from(leirasCheckboxContainerModal.querySelectorAll('input:checked')).map(cb => Number(cb.value));
+                if (selectedLeiras.length === 0) {
+                    subTasksChecklistEl.querySelector(`input[data-task-name="${currentTaskNameForModal}"]`).checked = false;
+                    closeLeirasModal();
+                    return;
+                }
+                const existingTaskIndex = localChanges.completedTasks.findIndex(t => t.name === currentTaskNameForModal);
+                if (existingTaskIndex !== -1) {
+                    localChanges.completedTasks[existingTaskIndex].leiras = selectedLeiras;
+                } else {
+                    localChanges.completedTasks.push({ name: currentTaskNameForModal, leiras: selectedLeiras });
+                }
+                closeLeirasModal();
+            });
+
+            cancelLeirasModalBtn.addEventListener('click', () => {
+                subTasksChecklistEl.querySelector(`input[data-task-name="${currentTaskNameForModal}"]`).checked = false;
+                closeLeirasModal();
+            });
+
+            saveTasksBtn.addEventListener('click', async () => {
+                if (!turmaSelect.value || !groupSelect.value) {
+                    saveFeedbackEl.textContent = "Por favor, selecione Turma e Grupo.";
+                    setTimeout(() => saveFeedbackEl.textContent = '', 3000);
+                    return;
+                }
+                
+                const dataToSave = {
+                    prefs: {
+                        turma: turmaSelect.value,
+                        grupo: groupSelect.value,
+                        semana: weekDisplay.textContent,
+                    },
+                    tasks: {
+                        selectedGroup: taskGroupSelect.value,
+                        completedTasks: localChanges.completedTasks,
+                        updatedAt: serverTimestamp()
+                    }
+                };
+
+                // Salva os dados na coleção pública para que outros usuários possam ver o progresso.
+                const userDocRef = doc(db, `artifacts/${appId}/public/data/user_data`, userId);
+                try {
+                    await setDoc(userDocRef, dataToSave, { merge: true });
+                    saveFeedbackEl.textContent = "Tarefas salvas com sucesso!";
+                } catch (error) {
+                    console.error("Erro ao salvar tarefas:", error);
+                    saveFeedbackEl.textContent = "Erro ao salvar. Verifique a conexão.";
+                }
+                setTimeout(() => saveFeedbackEl.textContent = '', 3000);
+            });
+
+            subTaskForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                if (!subTaskGroupNameInput.value) { console.error('Selecione um Grupo de Tarefas.'); return; }
+                const newSubTask = {
+                    groupName: subTaskGroupNameInput.value, name: subTaskNameInput.value, effort: Number(subTaskEffortInput.value), time: Number(subTaskTimeInput.value),
+                    leiras: Array.from(leirasCheckboxContainerForm.querySelectorAll('input:checked')).map(cb => Number(cb.value)), createdAt: serverTimestamp()
+                };
+                // Salva a sub-tarefa na coleção privada do usuário.
+                try {
+                    await addDoc(collection(db, `artifacts/${appId}/users/${userId}/sub_tasks`), newSubTask);
+                    subTaskForm.reset();
+                    subEffortValueSpan.textContent = '50%';
+                    subTimeValueSpan.textContent = '25';
+                    fetchAndRenderSubTasks(subTaskGroupNameInput.value, localChanges.completedTasks);
+                } catch (error) {
+                     console.error("Erro ao adicionar sub-tarefa:", error);
+                }
+            });
+            subTaskEffortInput.addEventListener('input', (e) => subEffortValueSpan.textContent = `${e.target.value}%`);
+            subTaskTimeInput.addEventListener('input', (e) => subTimeValueSpan.textContent = e.target.value);
+            
+            subTasksChecklistEl.addEventListener('click', async (e) => {
+                const deleteButton = e.target.closest('.delete-sub-task-btn');
+                if (deleteButton) {
+                    const docId = deleteButton.dataset.id;
+                    // Exclui a sub-tarefa da coleção privada do usuário.
+                    try {
+                        await deleteDoc(doc(db, `artifacts/${appId}/users/${userId}/sub_tasks`, docId));
+                        fetchAndRenderSubTasks(taskGroupSelect.value, localChanges.completedTasks);
+                    } catch (error) {
+                        console.error("Erro ao excluir sub-tarefa:", error);
+                    }
+                }
+            });
+
+            // Listeners da Visão de Leiras
+            closeModalBtn.addEventListener('click', closeHistoryModal);
+            historyModal.addEventListener('click', (e) => { if (e.target === historyModal) closeHistoryModal(); });
+            modalBodyEl.addEventListener('click', (e) => {
+                const deleteButton = e.target.closest('.delete-history-btn');
+                if (deleteButton) {
+                    const { leiraId, userId, taskName } = deleteButton.dataset;
+                    handleDeleteHistoryEntry(leiraId, userId, taskName);
+                }
+            });
+        }
+
+        // --- INÍCIO DA APLICAÇÃO ---
+        window.addEventListener('load', () => {
+            initializeFirebase();
+        });
+    </script>
+</body>
+</html>
